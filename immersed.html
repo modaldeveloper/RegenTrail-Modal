@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regen Trail Adventure</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    /* General styles */
+    body {
+      background-color: #2b2b2b;
+      color: #ffffff;
+      font-family: "Courier New", monospace;
+      text-align: center;
+    }
+
+    /* Scene background */
+    #scene-container {
+      height: 100vh;
+      width: 100vw;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-direction: column;
+    }
+
+    /* Text box for storytelling */
+    .story-box {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 90%;
+      word-break: break-word;
+      overflow: hidden;
+      white-space: normal;
+      text-align: left;
+    }
+
+    /* Log box for action text */
+    .log-box {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 150px;
+      overflow-y: scroll;
+      margin-top: 20px;
+      font-family: "Courier New", monospace;
+      white-space: normal;
+    }
+
+    /* Starburst effect for Ready to Travel button */
+    @keyframes starburst {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 10px #800080, 0 0 20px #800080;
+      }
+      50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px #800080, 0 0 40px #800080;
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px #800080, 0 0 20px #800080;
+      }
+    }
+
+    /* Starburst for travel button */
+    .starburst-button {
+      background-color: #800080;
+      padding: 15px 25px;
+      border-radius: 10px;
+      color: white;
+      border: none;
+      cursor: pointer;
+      animation: starburst 2s infinite;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    /* Buttons for actions */
+    .action-button {
+      background-color: #4CAF50;
+      padding: 10px 20px;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .action-button:hover {
+      transform: scale(1.1);
+      background-color: #45a049;
+    }
+
+    /* Stats section */
+    #stats-container {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 10px;
+      width: 150px;
+    }
+
+    /* Terminal-style display for minting Hypercert */
+    #terminal {
+      background: black;
+      color: green;
+      font-family: "Courier New", monospace;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 10px;
+      max-width: 90%;
+      text-align: left;
+      font-size: 1rem;
+      line-height: 1.5rem;
+      white-space: pre-wrap;
+      overflow: hidden;
+    }
+
+    /* Terminal typing effect */
+    @keyframes typingEffect {
+      0% { content: "█"; }
+      25% { content: "|"; }
+      50% { content: "/"; }
+      75% { content: "-"; }
+      100% { content: "\\"; }
+    }
+
+    .cursor {
+      font-weight: bold;
+      font-size: 1.2rem;
+      animation: typingEffect 1s infinite;
+    }
+
+    /* Mining effect with green blocks appearing */
+    @keyframes miningBlocks {
+      0% { background-color: #1e1e1e; }
+      50% { background-color: #008000; }
+      100% { background-color: #1e1e1e; }
+    }
+
+    .block {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background-color: #008000;
+      margin: 1px;
+      animation: miningBlocks 1.5s infinite;
+    }
+  </style>
+</head>
+<body>
+
+<div id="scene-container" class="fade-in" style="background-image: url('https://via.placeholder.com/1500x800?text=Start+Your+Journey');">
+  <div class="story-box" id="main-story-box">
+    <h2 id="story-title" class="text-2xl font-bold mb-4">Ready for your journey?</h2>
+    <button id="travel-button" class="action-button">Let's Go!</button>
+  </div>
+
+  <!-- Log Container for actions -->
+  <div id="action-log" class="log-box"></div>
+</div>
+
+<!-- Stats Container -->
+<div id="stats-container" class="hidden">
+  <div class="stat-box">
+    <p>HAND Tokens: <span id="hand-tokens">100</span></p>
+    <p>EARTH Tokens: <span id="earth-tokens">50</span></p>
+    <p>CARBON Tokens: <span id="carbon-tokens">0</span></p>
+    <p>Energy: <span id="energy">100</span></p>
+  </div>
+</div>
+
+<!-- JavaScript for interactive story -->
+<script>
+  let sceneContainer = document.getElementById('scene-container');
+  let storyTitle = document.getElementById('story-title');
+  let travelButton = document.getElementById('travel-button');
+  let statsContainer = document.getElementById('stats-container');
+  let actionLog = document.getElementById('action-log');
+
+  // Stats
+  let handTokens = 100;
+  let earthTokens = 50;
+  let carbonTokens = 0;
+  let energy = 100;
+
+  // Travel countdown
+  let travelCountdown;
+  let travelTime = 10; // Time in seconds
+
+  // Story progression
+  let currentStage = 0;
+  let travelLog = [];
+
+  // Typing effect speed
+  const typingSpeed = 50;
+
+  // Event scenes
+  const scenes = [
+    {
+      background: 'https://via.placeholder.com/1500x800?text=ETHDenver',
+      title: 'ETHDenver - The Blockchain Gathering',
+      text: 'You have arrived at ETHDenver! Many crypto enthusiasts are here, and they are eager to discuss the intersection of blockchain and sustainability. What will you do?',
+      options: ['Attend Workshops', 'Join a Panel Discussion', 'Explore the Event']
+    },
+    {
+      background: 'https://via.placeholder.com/1500x800?text=Devcon+Bangkok',
+      title: 'Devcon - Bangkok, Thailand',
+      text: 'You\'ve traveled to Devcon in Bangkok. It\'s a vibrant event filled with talks on DeFi, NFTs, and regenerative finance. How will you participate?',
+      options: ['Build a Solar Farm', 'Lead a Regen Project', 'Network with Developers']
+    },
+    {
+      background: 'https://via.placeholder.com/1500x800?text=SolarPunk+Summit',
+      title: 'SolarPunk Summit',
+      text: 'Welcome to the SolarPunk Summit! This event focuses on building regenerative cities and promoting eco-friendly solutions. What will you do?',
+      options: ['Give a Talk on Eco Tech', 'Visit Sustainable Booths', 'Collaborate with Green Architects']
+    }
+  ];
+
+  // Handle travel button click to begin adventure
+  travelButton.addEventListener('click', function () {
+    travelButton.remove();
+    startAdventure();
+  });
+
+  // Start the adventure with the first event
+  function startAdventure() {
+    statsContainer.classList.remove('hidden');
+    progressStory(scenes[currentStage]);
+  }
+
+  // Function to progress the story and display text with a typing effect
+  function progressStory(scene) {
+    sceneContainer.style.backgroundImage = `url(${scene.background})`;
+    storyTitle.innerText = scene.title;
+    showTypingEffect(scene.text);
+
+    // Create action buttons
+    createActionButtons(scene.options, scene.title);
+  }
+
+  // Create action buttons for each option
+  function createActionButtons(options, eventTitle) {
+    const actionsContainer = document.createElement('div');
+    actionsContainer.id = 'actions-container';
+    sceneContainer.appendChild(actionsContainer);
+
+    options.forEach((option, index) => {
+      const actionButton = document.createElement('button');
+      actionButton.innerText = option;
+      actionButton.className = 'action-button';
+      actionButton.addEventListener('click', () => handleAction(index, option, eventTitle));
+      actionsContainer.appendChild(actionButton);
+    });
+  }
+
+  // Handle actions
+  function handleAction(actionIndex, action, event) {
+    let logEntry = '';
+    if (actionIndex === 0) {
+      storyTitle.innerText = `You attended an insightful workshop on climate tech at ${event}!`;
+      earthTokens += 10;
+      logEntry = `Attended workshop at ${event}. Earned 10 EARTH tokens.`;
+    } else if (actionIndex === 1) {
+      storyTitle.innerText = `You led a panel on regenerative finance at ${event}!`;
+      handTokens += 20;
+      logEntry = `Led a panel at ${event}. Earned 20 HAND tokens.`;
+    } else if (actionIndex === 2) {
+      storyTitle.innerText = `You explored ${event} and made valuable connections!`;
+      energy -= 10;
+      logEntry = `Explored ${event}. Lost 10 energy.`;
+    }
+
+    // Add the log entry to the action log
+    updateLog(logEntry);
+
+    // Update stats and random event
+    updateStats();
+    randomEvent();
+  }
+
+  // Function to update the log
+  function updateLog(entry) {
+    actionLog.innerHTML += `<p>${entry}</p>`;
+    actionLog.scrollTop = actionLog.scrollHeight;  // Auto-scroll the log to the latest entry
+  }
+
+  // Show typing effect
+  function showTypingEffect(text) {
+    storyTitle.innerHTML = '';
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < text.length) {
+        storyTitle.innerHTML += text.charAt(i);
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, typingSpeed);
+  }
+
+  // Update the stats on the page
+  function updateStats() {
+    document.getElementById('hand-tokens').innerText = handTokens;
+    document.getElementById('earth-tokens').innerText = earthTokens;
+    document.getElementById('carbon-tokens').innerText = carbonTokens;
+    document.getElementById('energy').innerText = energy;
+  }
+
+</script>
+
+</body>
+</html>
