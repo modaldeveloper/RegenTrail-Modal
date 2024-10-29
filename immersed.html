@@ -35,6 +35,7 @@
       height: 100%;
       overflow: hidden;
       z-index: 1;
+      pointer-events: none; /* Allow clicks to pass through */
     }
 
     /* Stats and Story Container */
@@ -127,6 +128,7 @@
       animation: starburst 2s infinite;
       transition: transform 0.3s ease-in-out;
       margin-top: 10px;
+      z-index: 2;
     }
 
     .starburst-button:hover {
@@ -143,6 +145,7 @@
       cursor: pointer;
       margin: 10px 5px;
       transition: transform 0.3s ease-in-out;
+      z-index: 2;
     }
 
     .action-button:hover {
@@ -235,11 +238,11 @@
   const matrix = document.getElementById('matrix');
   const matrixChars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモ';
   const fontSize = 16;
-  const columns = matrix.width / fontSize;
+  const columns = Math.floor(window.innerWidth / fontSize);
   const drops = [];
 
   for (let x = 0; x < columns; x++) {
-    drops[x] = Math.random() * matrix.height;
+    drops[x] = Math.random() * window.innerHeight;
   }
 
   function drawMatrix() {
@@ -342,21 +345,21 @@
   }
 
   // Handle actions
-  function handleAction(button, actionIndex, action, event) {
+  function handleAction(button, actionIndex, action, eventTitle) {
     let logEntry = '';
     if (!button.disabled) {
       if (actionIndex === 0) {
-        storyTitle.innerText = `You engaged deeply at ${event}!`;
+        storyTitle.innerText = `You engaged deeply at ${eventTitle}!`;
         earthTokens += 10;
         energy -= 20;
         logEntry = `You chose to "${action}". Earned 10 EARTH tokens. Energy -20.`;
       } else if (actionIndex === 1) {
-        storyTitle.innerText = `You made a significant impact at ${event}!`;
+        storyTitle.innerText = `You made a significant impact at ${eventTitle}!`;
         handTokens += 20;
         energy -= 30;
         logEntry = `You chose to "${action}". Earned 20 HAND tokens. Energy -30.`;
       } else if (actionIndex === 2) {
-        storyTitle.innerText = `You expanded your horizons at ${event}!`;
+        storyTitle.innerText = `You expanded your horizons at ${eventTitle}!`;
         energy -= 10;
         logEntry = `You chose to "${action}". Energy -10.`;
       }
