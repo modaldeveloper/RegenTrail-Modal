@@ -2,31 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Regen Trail Adventure</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
     /* General styles */
     body {
-      background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(203,203,203,1) 100%);
+      background-color: #1a1a1a;
       color: #ffffff;
       font-family: "Courier New", monospace;
-      text-align: center;
-      overflow: hidden; /* Prevent scrollbars for the matrix effect */
+      margin: 0;
+      overflow: hidden;
     }
 
-    /* Scene background container */
+    /* Scene background */
     #scene-container {
       height: 100vh;
       width: 100vw;
+      background-size: cover;
+      background-position: center;
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
       position: relative;
       flex-direction: column;
     }
 
-    /* Text box for storytelling */
+    /* Matrix rain effect */
+    .matrix {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .matrix span {
+      position: absolute;
+      top: -100%;
+      color: rgba(0, 255, 70, 0.8);
+      font-size: 16px;
+      animation: rain 10s linear infinite;
+    }
+
+    @keyframes rain {
+      to {
+        top: 110%;
+      }
+    }
+
+    /* Story box for storytelling */
     .story-box {
       background: rgba(0, 0, 0, 0.7);
       padding: 20px;
@@ -34,81 +60,47 @@
       max-width: 600px;
       width: 90%;
       word-break: break-word;
+      overflow: hidden;
+      white-space: normal;
       text-align: left;
+      margin-bottom: 20px;
       z-index: 2;
     }
 
-    /* Log box for action text */
-    .log-box {
-      background: rgba(0, 0, 0, 0.8);
-      padding: 10px;
+    /* Console box for action text */
+    .console-box {
+      background: rgba(0, 0, 0, 0.9);
+      padding: 15px;
       border-radius: 10px;
       max-width: 600px;
       width: 90%;
-      max-height: 150px;
+      max-height: 200px;
       overflow-y: scroll;
-      margin-top: 20px;
+      margin-bottom: 20px;
       font-family: "Courier New", monospace;
-      white-space: normal;
+      white-space: pre-wrap;
+      color: #00ff46;
       z-index: 2;
     }
 
-    /* Matrix-style falling text */
-    .matrix {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: transparent;
-      z-index: 1;
-    }
-
-    .matrix span {
-      font-size: 20px;
-      font-family: "Courier New", monospace;
-      color: #00ff00;
-      opacity: 0.7;
-      animation: fall 3s linear infinite;
-    }
-
-    /* Falling animation */
-    @keyframes fall {
-      0% {
-        transform: translateY(-100%);
-      }
-      100% {
-        transform: translateY(100%);
-      }
-    }
-
-    /* Starburst effect for travel button */
+    /* Purple starburst button */
     @keyframes starburst {
-      0% {
-        transform: scale(1);
+      0%, 100% {
         box-shadow: 0 0 10px #800080, 0 0 20px #800080;
       }
       50% {
-        transform: scale(1.1);
         box-shadow: 0 0 20px #800080, 0 0 40px #800080;
-      }
-      100% {
-        transform: scale(1);
-        box-shadow: 0 0 10px #800080, 0 0 20px #800080;
       }
     }
 
-    /* Travel button with bus icon */
     .starburst-button {
       background-color: #800080;
       padding: 15px 25px;
-      border-radius: 10px;
+      border-radius: 50px;
       color: white;
       border: none;
       cursor: pointer;
       animation: starburst 2s infinite;
-      display: flex;
-      align-items: center;
       transition: transform 0.3s ease-in-out;
       z-index: 2;
     }
@@ -117,19 +109,31 @@
       transform: scale(1.1);
     }
 
-    .starburst-button img {
-      margin-right: 10px;
+    /* Action buttons */
+    .action-button {
+      background-color: #4CAF50;
+      padding: 10px 20px;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .action-button:hover {
+      transform: scale(1.1);
+      background-color: #45a049;
     }
 
     /* Stats section */
     #stats-container {
       display: flex;
       justify-content: space-around;
-      margin: 20px;
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
+      width: 100%;
+      padding: 10px;
       z-index: 2;
     }
 
@@ -138,58 +142,130 @@
       padding: 10px;
       border-radius: 10px;
       width: 150px;
+      text-align: left;
     }
 
-    /* Countdown timer */
-    #travel-timer {
-      margin-top: 10px;
-      font-size: 18px;
-      color: #fff;
-      z-index: 2;
+    /* Health bar */
+    .health-bar {
+      background: #555;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+
+    .health-bar-inner {
+      height: 10px;
+      background: linear-gradient(90deg, #ff0000, #00ff00);
+      width: 100%;
+    }
+
+    /* Confetti effect */
+    .confetti {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 0;
+      overflow: visible;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #f2f2f2;
+      opacity: 0.7;
+      animation: confetti 5s linear forwards;
+    }
+
+    @keyframes confetti {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
     }
   </style>
 </head>
 <body>
 
-<!-- Matrix-style falling Japanese text -->
 <div class="matrix" id="matrix"></div>
 
-<div id="scene-container" class="fade-in">
+<div id="scene-container">
+  <!-- Stats Container -->
+  <div id="stats-container">
+    <div class="stat-box">
+      <p>HAND Tokens: <span id="hand-tokens">100</span></p>
+      <p>EARTH Tokens: <span id="earth-tokens">50</span></p>
+      <p>CARBON Tokens: <span id="carbon-tokens">0</span></p>
+      <p>Energy:</p>
+      <div class="health-bar">
+        <div class="health-bar-inner" id="energy-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Story Box -->
   <div class="story-box" id="main-story-box">
     <h2 id="story-title" class="text-2xl font-bold mb-4">Ready for your journey?</h2>
-    <button id="travel-button" class="action-button">Let's Go!</button>
+    <button id="travel-button" class="starburst-button">Travel to Next Event</button>
   </div>
 
-  <!-- Log Container for actions -->
-  <div id="action-log" class="log-box"></div>
+  <!-- Console Box -->
+  <div id="action-log" class="console-box"></div>
 
-  <!-- Travel Timer and Travel Button -->
-  <div id="travel-timer"></div>
-  <button id="next-event-button" class="starburst-button" style="display: none;">
-    <img src="https://cdn-icons-png.flaticon.com/512/1041/1041884.png" width="24" alt="bus icon">
-    Travel to Next Event
-  </button>
-</div>
-
-<!-- Stats Container -->
-<div id="stats-container" class="hidden">
-  <div class="stat-box">
-    <p>HAND Tokens: <span id="hand-tokens">100</span></p>
-    <p>EARTH Tokens: <span id="earth-tokens">50</span></p>
-    <p>CARBON Tokens: <span id="carbon-tokens">0</span></p>
-    <p>Energy: <span id="energy">100</span></p>
-  </div>
+  <!-- Confetti Container -->
+  <div id="confetti-container" class="confetti"></div>
 </div>
 
 <!-- JavaScript for interactive story -->
 <script>
+  // Matrix rain effect
+  const matrix = document.getElementById('matrix');
+  const matrixChars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモ';
+  const matrixColumns = Math.floor(window.innerWidth / 20);
+  const matrixDrops = [];
+
+  for (let x = 0; x < matrixColumns; x++) {
+    matrixDrops[x] = 1;
+  }
+
+  function drawMatrix() {
+    const ctx = matrix.getContext('2d');
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, matrix.width, matrix.height);
+
+    ctx.fillStyle = '#00ff46';
+    ctx.font = '16px monospace';
+
+    for (let i = 0; i < matrixDrops.length; i++) {
+      const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+      ctx.fillText(text, i * 20, matrixDrops[i] * 20);
+
+      if (matrixDrops[i] * 20 > matrix.height && Math.random() > 0.975) {
+        matrixDrops[i] = 0;
+      }
+      matrixDrops[i]++;
+    }
+  }
+
+  matrix.width = window.innerWidth;
+  matrix.height = window.innerHeight;
+  setInterval(drawMatrix, 50);
+
+  // Game variables
   let sceneContainer = document.getElementById('scene-container');
   let storyTitle = document.getElementById('story-title');
   let travelButton = document.getElementById('travel-button');
-  let nextEventButton = document.getElementById('next-event-button');
-  let travelTimer = document.getElementById('travel-timer');
+  let statsContainer = document.getElementById('stats-container');
   let actionLog = document.getElementById('action-log');
-  let matrix = document.getElementById('matrix');
+  let energyBar = document.getElementById('energy-bar');
+  let confettiContainer = document.getElementById('confetti-container');
 
   // Stats
   let handTokens = 100;
@@ -199,50 +275,44 @@
 
   // Story progression
   let currentStage = 0;
-  let travelLog = [];
-  let travelTime = 10; // Timer countdown in seconds
-
-  // Typing effect speed
-  const typingSpeed = 50;
 
   // Event scenes
   const scenes = [
     {
       background: 'https://via.placeholder.com/1500x800?text=ETHDenver',
       title: 'ETHDenver - The Blockchain Gathering',
-      text: 'You have arrived at ETHDenver! Many crypto enthusiasts are here, and they are eager to discuss the intersection of blockchain and sustainability. What will you do?',
+      text: 'You arrive at ETHDenver, the heart of blockchain innovation. The air buzzes with ideas about decentralization and sustainability. What will you do?',
       options: ['Attend Workshops', 'Join a Panel Discussion', 'Explore the Event']
     },
     {
       background: 'https://via.placeholder.com/1500x800?text=Devcon+Bangkok',
       title: 'Devcon - Bangkok, Thailand',
-      text: 'You\'ve traveled to Devcon in Bangkok. It\'s a vibrant event filled with talks on DeFi, NFTs, and regenerative finance. How will you participate?',
+      text: 'At Devcon in Bangkok, the community is vibrant. Discussions range from DeFi to regenerative finance. How will you contribute?',
       options: ['Build a Solar Farm', 'Lead a Regen Project', 'Network with Developers']
     },
     {
       background: 'https://via.placeholder.com/1500x800?text=SolarPunk+Summit',
       title: 'SolarPunk Summit',
-      text: 'Welcome to the SolarPunk Summit! This event focuses on building regenerative cities and promoting eco-friendly solutions. What will you do?',
+      text: 'Welcome to the SolarPunk Summit! Visionaries unite to create sustainable futures. What path will you take?',
       options: ['Give a Talk on Eco Tech', 'Visit Sustainable Booths', 'Collaborate with Green Architects']
     }
   ];
 
   // Handle travel button click to begin adventure
   travelButton.addEventListener('click', function () {
-    travelButton.remove();
-    startAdventure();
+    if (currentStage < scenes.length) {
+      travelButton.style.display = 'none';
+      progressStory(scenes[currentStage]);
+    } else {
+      endAdventure();
+    }
   });
 
-  // Start the adventure with the first event
-  function startAdventure() {
-    statsContainer.classList.remove('hidden');
-    progressStory(scenes[currentStage]);
-  }
-
-  // Function to progress the story and display text with a typing effect
+  // Function to progress the story and display text
   function progressStory(scene) {
     sceneContainer.style.backgroundImage = `url(${scene.background})`;
     storyTitle.innerText = scene.title;
+    actionLog.innerText = '';
     showTypingEffect(scene.text);
 
     // Create action buttons
@@ -253,49 +323,67 @@
   function createActionButtons(options, eventTitle) {
     const actionsContainer = document.createElement('div');
     actionsContainer.id = 'actions-container';
+    actionsContainer.style.zIndex = '2';
     sceneContainer.appendChild(actionsContainer);
 
     options.forEach((option, index) => {
       const actionButton = document.createElement('button');
       actionButton.innerText = option;
       actionButton.className = 'action-button';
-      actionButton.addEventListener('click', () => handleAction(index, option, eventTitle));
+      actionButton.addEventListener('click', () => handleAction(index, option, eventTitle, actionsContainer));
       actionsContainer.appendChild(actionButton);
     });
-
-    // Show countdown and travel button
-    startCountdown();
   }
 
   // Handle actions
-  function handleAction(actionIndex, action, event) {
+  function handleAction(actionIndex, action, event, actionsContainer) {
     let logEntry = '';
     if (actionIndex === 0) {
-      storyTitle.innerText = `You attended an insightful workshop on climate tech at ${event}!`;
+      storyTitle.innerText = `You engaged deeply at ${event}!`;
       earthTokens += 10;
-      logEntry = `Attended workshop at ${event}. Earned 10 EARTH tokens.`;
+      energy -= 20;
+      logEntry = `You chose to "${action}". Earned 10 EARTH tokens. Energy -20.`;
     } else if (actionIndex === 1) {
-      storyTitle.innerText = `You led a panel on regenerative finance at ${event}!`;
+      storyTitle.innerText = `You made a significant impact at ${event}!`;
       handTokens += 20;
-      logEntry = `Led a panel at ${event}. Earned 20 HAND tokens.`;
+      energy -= 30;
+      logEntry = `You chose to "${action}". Earned 20 HAND tokens. Energy -30.`;
     } else if (actionIndex === 2) {
-      storyTitle.innerText = `You explored ${event} and made valuable connections!`;
+      storyTitle.innerText = `You expanded your horizons at ${event}!`;
       energy -= 10;
-      logEntry = `Explored ${event}. Lost 10 energy.`;
+      logEntry = `You chose to "${action}". Energy -10.`;
     }
 
-    // Add the log entry to the action log
+    // Update the log
     updateLog(logEntry);
 
-    // Update stats and random event
+    // Update stats
     updateStats();
-    randomEvent();
+
+    // Signal rest if energy is low
+    if (energy <= 20) {
+      signalRest();
+    }
+
+    // Clean up action buttons
+    actionsContainer.remove();
+
+    // Prepare for next stage
+    currentStage++;
+    if (currentStage < scenes.length) {
+      setTimeout(() => {
+        travelButton.style.display = 'block';
+        storyTitle.innerText = 'Ready to travel to the next event?';
+      }, 2000);
+    } else {
+      endAdventure();
+    }
   }
 
   // Function to update the log
   function updateLog(entry) {
-    actionLog.innerHTML += `<p>${entry}</p>`;
-    actionLog.scrollTop = actionLog.scrollHeight;  // Auto-scroll the log to the latest entry
+    actionLog.innerHTML += `${entry}\n`;
+    actionLog.scrollTop = actionLog.scrollHeight;
   }
 
   // Show typing effect
@@ -309,7 +397,7 @@
       } else {
         clearInterval(interval);
       }
-    }, typingSpeed);
+    }, 30);
   }
 
   // Update the stats on the page
@@ -317,58 +405,65 @@
     document.getElementById('hand-tokens').innerText = handTokens;
     document.getElementById('earth-tokens').innerText = earthTokens;
     document.getElementById('carbon-tokens').innerText = carbonTokens;
-    document.getElementById('energy').innerText = energy;
+    energyBar.style.width = `${energy}%`;
+    if (energy < 0) energy = 0;
   }
 
-  // Start countdown to show travel button
-  function startCountdown() {
-    travelTime = 10;
-    nextEventButton.style.display = 'block';
+  // Signal rest when energy is low
+  function signalRest() {
+    const restMessage = document.createElement('div');
+    restMessage.innerText = 'Your energy is low. Consider resting to recover.';
+    restMessage.style.position = 'absolute';
+    restMessage.style.top = '50%';
+    restMessage.style.left = '50%';
+    restMessage.style.transform = 'translate(-50%, -50%)';
+    restMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    restMessage.style.padding = '20px';
+    restMessage.style.borderRadius = '10px';
+    restMessage.style.zIndex = '3';
+    sceneContainer.appendChild(restMessage);
 
-    const countdownInterval = setInterval(() => {
-      travelTime--;
-      travelTimer.innerText = `Next event in: ${travelTime} seconds`;
-
-      if (travelTime <= 0) {
-        clearInterval(countdownInterval);
-        travelTimer.innerText = '';
-        nextEventButton.style.display = 'none';
-
-        // Move to next event
-        currentStage++;
-        if (currentStage < scenes.length) {
-          progressStory(scenes[currentStage]);
-        } else {
-          endStory();
-        }
-      }
-    }, 1000);
+    setTimeout(() => {
+      restMessage.remove();
+      energy += 50;
+      updateStats();
+    }, 3000);
   }
 
-  // End story sequence
-  function endStory() {
-    sceneContainer.innerHTML = '<h2>Adventure Complete!</h2><p>Your journey has come to an end. Thank you for playing!</p>';
+  // End the adventure with confetti and submit to karmaGAP
+  function endAdventure() {
+    storyTitle.innerText = 'Congratulations on completing your regen trail!';
+    travelButton.remove();
+    triggerConfetti();
+
+    // Simulate submission to karmaGAP
+    setTimeout(() => {
+      updateLog('Submitting your achievements to karmaGAP...');
+      // Add any submission logic here
+    }, 2000);
   }
 
-  // Matrix-style Japanese text falling in the background
-  const matrixCharacters = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
-  const columns = Array.from({ length: 50 }, () => Array(50).fill(''));
+  // Trigger confetti effect
+  function triggerConfetti() {
+    for (let i = 0; i < 100; i++) {
+      const confettiPiece = document.createElement('div');
+      confettiPiece.classList.add('confetti-piece');
+      confettiPiece.style.left = Math.random() * window.innerWidth + 'px';
+      confettiPiece.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      confettiContainer.appendChild(confettiPiece);
 
-  columns.forEach((_, i) => {
-    const column = document.createElement('div');
-    column.style.position = 'absolute';
-    column.style.top = '0';
-    column.style.left = `${i * 2}%`;
-    column.style.fontSize = '16px';
-    column.style.opacity = '0.5';
-    column.style.animationDuration = `${Math.random() * 2 + 1}s`;
-    matrix.appendChild(column);
+      confettiPiece.addEventListener('animationend', () => {
+        confettiPiece.remove();
+      });
+    }
+  }
 
-    setInterval(() => {
-      const randomChar = matrixCharacters[Math.floor(Math.random() * matrixCharacters.length)];
-      column.innerHTML = `<span>${randomChar}</span>`;
-    }, 100);
-  });
+  // Initialize the game
+  function initGame() {
+    updateStats();
+  }
+
+  initGame();
 </script>
 
 </body>
