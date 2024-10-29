@@ -21,10 +21,9 @@
       background-size: cover;
       background-position: center;
       display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      position: relative;
       flex-direction: column;
+      align-items: center;
+      position: relative;
     }
 
     /* Matrix rain effect */
@@ -38,18 +37,44 @@
       z-index: 1;
     }
 
-    .matrix span {
-      position: absolute;
-      top: -100%;
-      color: rgba(0, 255, 70, 0.8);
-      font-size: 16px;
-      animation: rain 10s linear infinite;
+    /* Stats and Story Container */
+    #stats-story-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+      z-index: 2;
     }
 
-    @keyframes rain {
-      to {
-        top: 110%;
-      }
+    /* Stats section */
+    #stats-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    /* Health bar */
+    .health-bar {
+      background: #555;
+      border-radius: 5px;
+      overflow: hidden;
+      width: 150px;
+      height: 15px;
+      margin-top: 5px;
+    }
+
+    .health-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, #ff0000, #00ff00);
+      width: 100%;
     }
 
     /* Story box for storytelling */
@@ -57,14 +82,13 @@
       background: rgba(0, 0, 0, 0.7);
       padding: 20px;
       border-radius: 10px;
-      max-width: 600px;
+      max-width: 800px;
       width: 90%;
       word-break: break-word;
       overflow: hidden;
       white-space: normal;
-      text-align: left;
-      margin-bottom: 20px;
-      z-index: 2;
+      text-align: center;
+      margin-top: 10px;
     }
 
     /* Console box for action text */
@@ -72,11 +96,11 @@
       background: rgba(0, 0, 0, 0.9);
       padding: 15px;
       border-radius: 10px;
-      max-width: 600px;
+      max-width: 800px;
       width: 90%;
       max-height: 200px;
       overflow-y: scroll;
-      margin-bottom: 20px;
+      margin-top: 10px;
       font-family: "Courier New", monospace;
       white-space: pre-wrap;
       color: #00ff46;
@@ -102,7 +126,7 @@
       cursor: pointer;
       animation: starburst 2s infinite;
       transition: transform 0.3s ease-in-out;
-      z-index: 2;
+      margin-top: 10px;
     }
 
     .starburst-button:hover {
@@ -117,7 +141,7 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      margin: 10px;
+      margin: 10px 5px;
       transition: transform 0.3s ease-in-out;
     }
 
@@ -126,37 +150,10 @@
       background-color: #45a049;
     }
 
-    /* Stats section */
-    #stats-container {
-      display: flex;
-      justify-content: space-around;
-      position: absolute;
-      top: 0;
-      width: 100%;
-      padding: 10px;
-      z-index: 2;
-    }
-
-    .stat-box {
-      background: rgba(0, 0, 0, 0.5);
-      padding: 10px;
-      border-radius: 10px;
-      width: 150px;
-      text-align: left;
-    }
-
-    /* Health bar */
-    .health-bar {
-      background: #555;
-      border-radius: 5px;
-      overflow: hidden;
-      margin-top: 5px;
-    }
-
-    .health-bar-inner {
-      height: 10px;
-      background: linear-gradient(90deg, #ff0000, #00ff00);
-      width: 100%;
+    .action-button:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+      transform: none;
     }
 
     /* Confetti effect */
@@ -194,27 +191,36 @@
 </head>
 <body>
 
-<div class="matrix" id="matrix"></div>
+<canvas class="matrix" id="matrix"></canvas>
 
 <div id="scene-container">
-  <!-- Stats Container -->
-  <div id="stats-container">
-    <div class="stat-box">
-      <p>HAND Tokens: <span id="hand-tokens">100</span></p>
-      <p>EARTH Tokens: <span id="earth-tokens">50</span></p>
-      <p>CARBON Tokens: <span id="carbon-tokens">0</span></p>
-      <p>Energy:</p>
-      <div class="health-bar">
-        <div class="health-bar-inner" id="energy-bar"></div>
+  <div id="stats-story-container">
+    <!-- Stats Container -->
+    <div id="stats-container">
+      <div class="stat-box">
+        <p>HAND Tokens: <span id="hand-tokens">100</span></p>
+        <p>EARTH Tokens: <span id="earth-tokens">50</span></p>
+        <p>CARBON Tokens: <span id="carbon-tokens">0</span></p>
       </div>
+      <div class="stat-box">
+        <p>Energy</p>
+        <div class="health-bar">
+          <div class="health-bar-inner" id="energy-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Story Box -->
+    <div class="story-box" id="main-story-box">
+      <h2 id="story-title" class="text-2xl font-bold mb-4">Ready for your journey?</h2>
     </div>
   </div>
 
-  <!-- Story Box -->
-  <div class="story-box" id="main-story-box">
-    <h2 id="story-title" class="text-2xl font-bold mb-4">Ready for your journey?</h2>
-    <button id="travel-button" class="starburst-button">Travel to Next Event</button>
-  </div>
+  <!-- Action Buttons will be injected here -->
+  <div id="actions-container"></div>
+
+  <!-- Travel Button (Initially Hidden) -->
+  <button id="travel-button" class="starburst-button" style="display: none;">Travel to Next Event</button>
 
   <!-- Console Box -->
   <div id="action-log" class="console-box"></div>
@@ -228,11 +234,12 @@
   // Matrix rain effect
   const matrix = document.getElementById('matrix');
   const matrixChars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモ';
-  const matrixColumns = Math.floor(window.innerWidth / 20);
-  const matrixDrops = [];
+  const fontSize = 16;
+  const columns = matrix.width / fontSize;
+  const drops = [];
 
-  for (let x = 0; x < matrixColumns; x++) {
-    matrixDrops[x] = 1;
+  for (let x = 0; x < columns; x++) {
+    drops[x] = Math.random() * matrix.height;
   }
 
   function drawMatrix() {
@@ -241,16 +248,17 @@
     ctx.fillRect(0, 0, matrix.width, matrix.height);
 
     ctx.fillStyle = '#00ff46';
-    ctx.font = '16px monospace';
+    ctx.font = fontSize + 'px monospace';
 
-    for (let i = 0; i < matrixDrops.length; i++) {
+    for (let i = 0; i < drops.length; i++) {
       const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
-      ctx.fillText(text, i * 20, matrixDrops[i] * 20);
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-      if (matrixDrops[i] * 20 > matrix.height && Math.random() > 0.975) {
-        matrixDrops[i] = 0;
+      if (drops[i] * fontSize > matrix.height && Math.random() > 0.975) {
+        drops[i] = 0;
       }
-      matrixDrops[i]++;
+
+      drops[i]++;
     }
   }
 
@@ -266,6 +274,7 @@
   let actionLog = document.getElementById('action-log');
   let energyBar = document.getElementById('energy-bar');
   let confettiContainer = document.getElementById('confetti-container');
+  let actionsContainer = document.getElementById('actions-container');
 
   // Stats
   let handTokens = 100;
@@ -275,6 +284,7 @@
 
   // Story progression
   let currentStage = 0;
+  let activitySelected = false;
 
   // Event scenes
   const scenes = [
@@ -298,15 +308,14 @@
     }
   ];
 
-  // Handle travel button click to begin adventure
-  travelButton.addEventListener('click', function () {
+  // Start the adventure
+  function startAdventure() {
     if (currentStage < scenes.length) {
-      travelButton.style.display = 'none';
       progressStory(scenes[currentStage]);
     } else {
       endAdventure();
     }
-  });
+  }
 
   // Function to progress the story and display text
   function progressStory(scene) {
@@ -321,64 +330,65 @@
 
   // Create action buttons for each option
   function createActionButtons(options, eventTitle) {
-    const actionsContainer = document.createElement('div');
-    actionsContainer.id = 'actions-container';
-    actionsContainer.style.zIndex = '2';
-    sceneContainer.appendChild(actionsContainer);
-
+    actionsContainer.innerHTML = ''; // Clear previous buttons
+    activitySelected = false;
     options.forEach((option, index) => {
       const actionButton = document.createElement('button');
       actionButton.innerText = option;
       actionButton.className = 'action-button';
-      actionButton.addEventListener('click', () => handleAction(index, option, eventTitle, actionsContainer));
+      actionButton.addEventListener('click', () => handleAction(actionButton, index, option, eventTitle));
       actionsContainer.appendChild(actionButton);
     });
   }
 
   // Handle actions
-  function handleAction(actionIndex, action, event, actionsContainer) {
+  function handleAction(button, actionIndex, action, event) {
     let logEntry = '';
-    if (actionIndex === 0) {
-      storyTitle.innerText = `You engaged deeply at ${event}!`;
-      earthTokens += 10;
-      energy -= 20;
-      logEntry = `You chose to "${action}". Earned 10 EARTH tokens. Energy -20.`;
-    } else if (actionIndex === 1) {
-      storyTitle.innerText = `You made a significant impact at ${event}!`;
-      handTokens += 20;
-      energy -= 30;
-      logEntry = `You chose to "${action}". Earned 20 HAND tokens. Energy -30.`;
-    } else if (actionIndex === 2) {
-      storyTitle.innerText = `You expanded your horizons at ${event}!`;
-      energy -= 10;
-      logEntry = `You chose to "${action}". Energy -10.`;
-    }
+    if (!button.disabled) {
+      if (actionIndex === 0) {
+        storyTitle.innerText = `You engaged deeply at ${event}!`;
+        earthTokens += 10;
+        energy -= 20;
+        logEntry = `You chose to "${action}". Earned 10 EARTH tokens. Energy -20.`;
+      } else if (actionIndex === 1) {
+        storyTitle.innerText = `You made a significant impact at ${event}!`;
+        handTokens += 20;
+        energy -= 30;
+        logEntry = `You chose to "${action}". Earned 20 HAND tokens. Energy -30.`;
+      } else if (actionIndex === 2) {
+        storyTitle.innerText = `You expanded your horizons at ${event}!`;
+        energy -= 10;
+        logEntry = `You chose to "${action}". Energy -10.`;
+      }
 
-    // Update the log
-    updateLog(logEntry);
+      // Update the log
+      updateLog(logEntry);
 
-    // Update stats
-    updateStats();
+      // Update stats
+      updateStats();
 
-    // Signal rest if energy is low
-    if (energy <= 20) {
-      signalRest();
-    }
+      // Mark the button as selected
+      button.disabled = true;
+      activitySelected = true;
 
-    // Clean up action buttons
-    actionsContainer.remove();
-
-    // Prepare for next stage
-    currentStage++;
-    if (currentStage < scenes.length) {
-      setTimeout(() => {
+      // Show the travel button after first activity selection
+      if (activitySelected) {
         travelButton.style.display = 'block';
-        storyTitle.innerText = 'Ready to travel to the next event?';
-      }, 2000);
-    } else {
-      endAdventure();
+      }
+
+      // Signal rest if energy is low
+      if (energy <= 20) {
+        signalRest();
+      }
     }
   }
+
+  // Travel to next event
+  travelButton.addEventListener('click', () => {
+    currentStage++;
+    travelButton.style.display = 'none';
+    startAdventure();
+  });
 
   // Function to update the log
   function updateLog(entry) {
@@ -405,14 +415,14 @@
     document.getElementById('hand-tokens').innerText = handTokens;
     document.getElementById('earth-tokens').innerText = earthTokens;
     document.getElementById('carbon-tokens').innerText = carbonTokens;
-    energyBar.style.width = `${energy}%`;
     if (energy < 0) energy = 0;
+    energyBar.style.width = `${energy}%`;
   }
 
   // Signal rest when energy is low
   function signalRest() {
     const restMessage = document.createElement('div');
-    restMessage.innerText = 'Your energy is low. Consider resting to recover.';
+    restMessage.innerText = 'Your energy is low. Resting to recover...';
     restMessage.style.position = 'absolute';
     restMessage.style.top = '50%';
     restMessage.style.left = '50%';
@@ -426,6 +436,7 @@
     setTimeout(() => {
       restMessage.remove();
       energy += 50;
+      if (energy > 100) energy = 100;
       updateStats();
     }, 3000);
   }
@@ -433,6 +444,7 @@
   // End the adventure with confetti and submit to karmaGAP
   function endAdventure() {
     storyTitle.innerText = 'Congratulations on completing your regen trail!';
+    actionsContainer.innerHTML = '';
     travelButton.remove();
     triggerConfetti();
 
@@ -461,6 +473,7 @@
   // Initialize the game
   function initGame() {
     updateStats();
+    startAdventure();
   }
 
   initGame();
