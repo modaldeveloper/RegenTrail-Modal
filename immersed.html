@@ -8,18 +8,17 @@
   <style>
     /* General styles */
     body {
-      background-color: #2b2b2b;
+      background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(203,203,203,1) 100%);
       color: #ffffff;
       font-family: "Courier New", monospace;
       text-align: center;
+      overflow: hidden; /* Prevent scrollbars for the matrix effect */
     }
 
-    /* Scene background */
+    /* Scene background container */
     #scene-container {
       height: 100vh;
       width: 100vw;
-      background-size: cover;
-      background-position: center;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -35,9 +34,8 @@
       max-width: 600px;
       width: 90%;
       word-break: break-word;
-      overflow: hidden;
-      white-space: normal;
       text-align: left;
+      z-index: 2;
     }
 
     /* Log box for action text */
@@ -52,9 +50,39 @@
       margin-top: 20px;
       font-family: "Courier New", monospace;
       white-space: normal;
+      z-index: 2;
     }
 
-    /* Starburst effect for Ready to Travel button */
+    /* Matrix-style falling text */
+    .matrix {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: transparent;
+      z-index: 1;
+    }
+
+    .matrix span {
+      font-size: 20px;
+      font-family: "Courier New", monospace;
+      color: #00ff00;
+      opacity: 0.7;
+      animation: fall 3s linear infinite;
+    }
+
+    /* Falling animation */
+    @keyframes fall {
+      0% {
+        transform: translateY(-100%);
+      }
+      100% {
+        transform: translateY(100%);
+      }
+    }
+
+    /* Starburst effect for travel button */
     @keyframes starburst {
       0% {
         transform: scale(1);
@@ -70,7 +98,7 @@
       }
     }
 
-    /* Starburst for travel button */
+    /* Travel button with bus icon */
     .starburst-button {
       background-color: #800080;
       padding: 15px 25px;
@@ -79,24 +107,18 @@
       border: none;
       cursor: pointer;
       animation: starburst 2s infinite;
+      display: flex;
+      align-items: center;
       transition: transform 0.3s ease-in-out;
+      z-index: 2;
     }
 
-    /* Buttons for actions */
-    .action-button {
-      background-color: #4CAF50;
-      padding: 10px 20px;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin: 10px;
-      transition: transform 0.3s ease-in-out;
-    }
-
-    .action-button:hover {
+    .starburst-button:hover {
       transform: scale(1.1);
-      background-color: #45a049;
+    }
+
+    .starburst-button img {
+      margin-right: 10px;
     }
 
     /* Stats section */
@@ -108,6 +130,7 @@
       top: 0;
       left: 0;
       right: 0;
+      z-index: 2;
     }
 
     .stat-box {
@@ -117,57 +140,21 @@
       width: 150px;
     }
 
-    /* Terminal-style display for minting Hypercert */
-    #terminal {
-      background: black;
-      color: green;
-      font-family: "Courier New", monospace;
-      padding: 20px;
-      margin: 20px;
-      border-radius: 10px;
-      max-width: 90%;
-      text-align: left;
-      font-size: 1rem;
-      line-height: 1.5rem;
-      white-space: pre-wrap;
-      overflow: hidden;
-    }
-
-    /* Terminal typing effect */
-    @keyframes typingEffect {
-      0% { content: "█"; }
-      25% { content: "|"; }
-      50% { content: "/"; }
-      75% { content: "-"; }
-      100% { content: "\\"; }
-    }
-
-    .cursor {
-      font-weight: bold;
-      font-size: 1.2rem;
-      animation: typingEffect 1s infinite;
-    }
-
-    /* Mining effect with green blocks appearing */
-    @keyframes miningBlocks {
-      0% { background-color: #1e1e1e; }
-      50% { background-color: #008000; }
-      100% { background-color: #1e1e1e; }
-    }
-
-    .block {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background-color: #008000;
-      margin: 1px;
-      animation: miningBlocks 1.5s infinite;
+    /* Countdown timer */
+    #travel-timer {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #fff;
+      z-index: 2;
     }
   </style>
 </head>
 <body>
 
-<div id="scene-container" class="fade-in" style="background-image: url('https://via.placeholder.com/1500x800?text=Start+Your+Journey');">
+<!-- Matrix-style falling Japanese text -->
+<div class="matrix" id="matrix"></div>
+
+<div id="scene-container" class="fade-in">
   <div class="story-box" id="main-story-box">
     <h2 id="story-title" class="text-2xl font-bold mb-4">Ready for your journey?</h2>
     <button id="travel-button" class="action-button">Let's Go!</button>
@@ -175,6 +162,13 @@
 
   <!-- Log Container for actions -->
   <div id="action-log" class="log-box"></div>
+
+  <!-- Travel Timer and Travel Button -->
+  <div id="travel-timer"></div>
+  <button id="next-event-button" class="starburst-button" style="display: none;">
+    <img src="https://cdn-icons-png.flaticon.com/512/1041/1041884.png" width="24" alt="bus icon">
+    Travel to Next Event
+  </button>
 </div>
 
 <!-- Stats Container -->
@@ -192,8 +186,10 @@
   let sceneContainer = document.getElementById('scene-container');
   let storyTitle = document.getElementById('story-title');
   let travelButton = document.getElementById('travel-button');
-  let statsContainer = document.getElementById('stats-container');
+  let nextEventButton = document.getElementById('next-event-button');
+  let travelTimer = document.getElementById('travel-timer');
   let actionLog = document.getElementById('action-log');
+  let matrix = document.getElementById('matrix');
 
   // Stats
   let handTokens = 100;
@@ -201,13 +197,10 @@
   let carbonTokens = 0;
   let energy = 100;
 
-  // Travel countdown
-  let travelCountdown;
-  let travelTime = 10; // Time in seconds
-
   // Story progression
   let currentStage = 0;
   let travelLog = [];
+  let travelTime = 10; // Timer countdown in seconds
 
   // Typing effect speed
   const typingSpeed = 50;
@@ -269,6 +262,9 @@
       actionButton.addEventListener('click', () => handleAction(index, option, eventTitle));
       actionsContainer.appendChild(actionButton);
     });
+
+    // Show countdown and travel button
+    startCountdown();
   }
 
   // Handle actions
@@ -324,6 +320,55 @@
     document.getElementById('energy').innerText = energy;
   }
 
+  // Start countdown to show travel button
+  function startCountdown() {
+    travelTime = 10;
+    nextEventButton.style.display = 'block';
+
+    const countdownInterval = setInterval(() => {
+      travelTime--;
+      travelTimer.innerText = `Next event in: ${travelTime} seconds`;
+
+      if (travelTime <= 0) {
+        clearInterval(countdownInterval);
+        travelTimer.innerText = '';
+        nextEventButton.style.display = 'none';
+
+        // Move to next event
+        currentStage++;
+        if (currentStage < scenes.length) {
+          progressStory(scenes[currentStage]);
+        } else {
+          endStory();
+        }
+      }
+    }, 1000);
+  }
+
+  // End story sequence
+  function endStory() {
+    sceneContainer.innerHTML = '<h2>Adventure Complete!</h2><p>Your journey has come to an end. Thank you for playing!</p>';
+  }
+
+  // Matrix-style Japanese text falling in the background
+  const matrixCharacters = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+  const columns = Array.from({ length: 50 }, () => Array(50).fill(''));
+
+  columns.forEach((_, i) => {
+    const column = document.createElement('div');
+    column.style.position = 'absolute';
+    column.style.top = '0';
+    column.style.left = `${i * 2}%`;
+    column.style.fontSize = '16px';
+    column.style.opacity = '0.5';
+    column.style.animationDuration = `${Math.random() * 2 + 1}s`;
+    matrix.appendChild(column);
+
+    setInterval(() => {
+      const randomChar = matrixCharacters[Math.floor(Math.random() * matrixCharacters.length)];
+      column.innerHTML = `<span>${randomChar}</span>`;
+    }, 100);
+  });
 </script>
 
 </body>
