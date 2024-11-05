@@ -1,5 +1,5 @@
-# RegenTrail
-Regen trail
+# Hack The Bus
+An EthDenver Hackathon For Developers!
 
 Welcome! First iteration is a basic clicker with some fun elements.
 
